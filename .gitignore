@@ -1,0 +1,50 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# Logs
+logs
+*.log
+*.log.*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+*.cache
+.cache/
+dist/
+build/
+coverage/
+tmp/
+temp/
+
+# dotenv environment variables
+.env
+.env.local
+.env.*.local
+
+# React (frontend)
+frontend/node_modules/
+frontend/build/
+frontend/.env
+
+# Next.js (if used)
+.next/
+out/
+
+# VS Code / IDE settings
+.vscode/
+.idea/
+*.swp
+
+# OS-specific
+.DS_Store
+Thumbs.db
