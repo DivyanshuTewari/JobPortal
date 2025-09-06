@@ -17,7 +17,7 @@ export const registerCompany = async(req , res) => {
         };
         company = await Company.create({
             name: companyName,
-            userId: req.id
+            userId: req.id,
         });
         return res.status(201).json({
             message : "Company registered successfully",
@@ -46,7 +46,12 @@ export const getCompany = async(req , res) => {
                 message: "Companies not found",
                 success: false,
             });
-        };       
+        };
+        return res.status(200).json(
+        {
+            companies,
+            success: true,
+        });             
 
     }
     catch (error){
