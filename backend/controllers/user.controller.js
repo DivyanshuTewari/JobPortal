@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt  from "jsonwebtoken";
 import dotenv from "dotenv";
+import getDataUri from "../utils/datauri.js";
 
 //SignUp
 export const register = async (req , res) => {
@@ -129,11 +130,11 @@ export const logout = async (req,res) =>{
 export const updateProfile = async(req,res) => {
     try {
         const {fullname, email, phoneNumber, bio, skills} = req.body;
-        const file = req.file;
         
-
         //cloudinary implementation here 
-
+        const file = req.file;
+        const fileUri = getDataUri(file);
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);        
 
         //skills come in string format so we have to convert it into array format
         let skillsArray;
@@ -157,7 +158,10 @@ export const updateProfile = async(req,res) => {
         if(skillsArray) user.profile.skills = skillsArray;
         
         //resume section will be implemented later .. 
-        
+        if(cloudResponse){
+            user.profile.resume = cloudResponse.secure_url; // Save the cloudinary url
+            user.profile.resumeOriginalName = file.originalname //Save the original name
+        }
         
         await user.save();
 
