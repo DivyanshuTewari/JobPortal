@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt  from "jsonwebtoken";
 import dotenv from "dotenv";
 import getDataUri from "../utils/datauri.js";
-
+import cloudinary from "../utils/cloudinary.js";
 //SignUp
 export const register = async (req , res) => {
     try {
@@ -15,6 +15,10 @@ export const register = async (req , res) => {
                 success: false,
             });
         };
+        
+        const file = req.file;
+        const fileUri = getDataUri(file);
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
         const user = await User.findOne({email});
         if(user){
             return res.status(400).json({
@@ -24,12 +28,14 @@ export const register = async (req , res) => {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         await User.create({
-            fullname,
-            email,
-            phoneNumber,
-            password : hashedPassword,
-            role,
-            
+          fullname,
+          email,
+          phoneNumber,
+          password: hashedPassword,
+          role,
+          profile: {
+            profilePhoto: cloudResponse.secure_url,
+          }
         });
         return res.status(201).json({
             message: "Account created successfully",
@@ -136,6 +142,7 @@ export const updateProfile = async(req,res) => {
         const fileUri = getDataUri(file);
         const cloudResponse = await cloudinary.uploader.upload(fileUri.content);        
 
+        
         //skills come in string format so we have to convert it into array format
         let skillsArray;
         if(skills){
@@ -160,7 +167,7 @@ export const updateProfile = async(req,res) => {
         //resume section will be implemented later .. 
         if(cloudResponse){
             user.profile.resume = cloudResponse.secure_url; // Save the cloudinary url
-            user.profile.resumeOriginalName = file.originalname //Save the original name
+            user.profile.resumeOriginalName = file.originalname; //Save the original name
         }
         
         await user.save();

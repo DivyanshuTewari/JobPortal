@@ -59,7 +59,7 @@ function Profile() {
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label className="text-md font-bold">Resume</Label>
           {isResume ? (
-            <a target="blank" href="https://youtube.com" className=" text-blue-600 underline hover:text-blue-800">
+            <a target="blank" href={user?.profile?.resume} className=" text-blue-600 underline hover:text-blue-800">
               {" "}
               {user?.profile?.resumeOriginalName}
             </a>

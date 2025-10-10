@@ -30,13 +30,12 @@ function UpdateProfileDialog({ open, setOpen }) {
 
     const fileChangeHandler = (e) => {
         const file = e.target.files?.[0];
-        setInput({ ...input, [e.target.name]: e.target.value }); 
+        setInput({ ...input, file}); 
     };
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        setLoading(true);
-
+        
         const formData = new FormData();
         formData.append('fullname', input.fullname);
         formData.append('email', input.email);
@@ -48,6 +47,7 @@ function UpdateProfileDialog({ open, setOpen }) {
         }
 
         try {
+            setLoading(true);
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
@@ -58,12 +58,12 @@ function UpdateProfileDialog({ open, setOpen }) {
             }
         } catch (error) {
             console.log(error);
-            toast.error(error?.response?.data?.message || "Update failed");
+            toast.error(error.response.data.message || "Update failed");
         } finally {
             setLoading(false);
-            setOpen(false);
+            
         }
-
+        setOpen(false);
         console.log(input);
     };
 
@@ -119,7 +119,7 @@ function UpdateProfileDialog({ open, setOpen }) {
                         <div className='grid gap-4 py-4'>
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor='file' className='text-right'>Resume</Label>
-                                <Input id='file' name='file' type='file' accept='application/pdf' onChange={fileChangeHandler} className='col-span-3 ' />
+                                <Input id='file' name='file' type='file' accept='application/pdf'  onChange={fileChangeHandler} className='col-span-3 ' />
                             </div>
                         </div>
                         <DialogFooter>
