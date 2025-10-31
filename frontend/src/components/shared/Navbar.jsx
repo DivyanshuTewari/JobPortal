@@ -42,20 +42,41 @@ function Navbar() {
             </div>
             <div className = "flex items-center gap-12">         
                 <ul className="flex font-medium items-center gap-5">
-                    <li>
-                    <NavLink to="/" className={({ isActive }) =>
-                    isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"}>
-                    Home </NavLink>
-                    </li>
-                    <li>
-                    <NavLink to="/jobs" className={({ isActive }) => isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600" } >
-                    Jobs </NavLink>
-                    </li>
-                    <li>
-                    <NavLink to="/browse" className={({ isActive }) =>isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600" }>
-                    Browse
-                    </NavLink>
-                    </li>
+                    {
+                        user && user.role == "recruiter" ? (
+                                <>
+                                    <li>
+                                        <NavLink to="/admin/companies" className={({ isActive }) =>
+                                            isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"}>
+                                            Companies</NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink to="/admin/jobs" className={({ isActive }) => isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"} >
+                                            Jobs </NavLink>
+                                    </li>
+                                </>
+                            ) : (
+
+                                <>
+                                    <li>
+                                        <NavLink to="/" className={({ isActive }) =>
+                                            isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"}>
+                                            Home </NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink to="/jobs" className={({ isActive }) => isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"} >
+                                            Jobs </NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink to="/browse" className={({ isActive }) => isActive ? "text-red-600 font-semibold" : "text-gray-700 hover:text-pink-600"}>
+                                            Browse
+                                        </NavLink>
+                                    </li>
+                                </>
+
+                            )
+                    }
+                    
                 </ul>
 
                 {
@@ -86,12 +107,7 @@ function Navbar() {
                                     </div>
                                 </div>
                                 <div className='flex flex-col my-2 text-gray-600'>
-                                    <div className='flex w-fit items-center gap-2 cursor-pointer'>
-                                        <User2/>
-                                        <Button  variant="link"  className="!border-none !shadow-none !bg-transparent hover:!bg-transparent focus:!ring-0">
-                                            <Link to='/profile'>View Profile</Link>
-                                        </Button>
-                                    </div>
+                                    
                                     <div className='flex w-fit items-center gap-2 cursor-pointer'>
                                         <LogOut/>
                                         <Button onClick={logoutHandler} variant="link"  className="cursor-pointer !border-none !shadow-none !bg-transparent hover:!bg-transparent focus:!ring-0">
