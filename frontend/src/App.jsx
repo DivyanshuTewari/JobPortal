@@ -1,6 +1,4 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Navbar from './components/shared/Navbar'
 import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
@@ -13,6 +11,7 @@ import CompanyCreate from './components/admin/CompanyCreate'
 import CompanySetup from './components/admin/CompanySetup'
 import AdminJobs from './components/admin/AdminJobs'
 import PostJob from './components/admin/PostJob'
+import Applicants from './components/admin/Applicants'
 
 const appRouter = createBrowserRouter([
   {
@@ -65,6 +64,10 @@ const appRouter = createBrowserRouter([
   {
     path:"/admin/jobs/create",
     element: <PostJob/>
+  },
+  {
+    path:"/admin/jobs/:id/applicants",
+    element: <Applicants/>
   }
 
   
