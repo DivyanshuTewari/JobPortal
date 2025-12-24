@@ -2,7 +2,7 @@ import React from 'react'
 import { Popover, PopoverTrigger , PopoverContent } from '../ui/popover'
 import { Avatar, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
-import { LogOut, User2 } from 'lucide-react'
+import { LogOut, User2, Heart } from 'lucide-react'
 import { Link, useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
@@ -113,6 +113,16 @@ function Navbar() {
                                                         <User2 />
                                                         <Button variant="link" className="!border-none !shadow-none !bg-transparent hover:!bg-transparent focus:!ring-0">
                                                             <Link to='/profile'>View Profile</Link>
+                                                        </Button>
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                user && user.role == "student" && (
+                                                    <div className='flex w-fit items-center gap-2 cursor-pointer'>
+                                                        <Heart />
+                                                        <Button variant="link" className="!border-none !shadow-none !bg-transparent hover:!bg-transparent focus:!ring-0">
+                                                            <Link to='/saved-jobs'>Saved Jobs</Link>
                                                         </Button>
                                                     </div>
                                                 )

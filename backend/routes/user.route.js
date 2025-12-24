@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { login, logout, register, updateProfile } from "../controllers/user.controller.js";
+import { login, logout, register, updateProfile, toggleBookmark, getBookmarkedJobs } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js"
 import { singleUpload } from "../middlewares/multer.js";
 
@@ -8,5 +8,7 @@ router.route("/register").post(singleUpload ,register);
 router.route("/login").post(login);
 router.route("/profile/update").post(isAuthenticated ,singleUpload ,updateProfile);
 router.route("/logout").get(logout);
+router.route("/bookmark/:id").get(isAuthenticated, toggleBookmark);
+router.route("/bookmarks").get(isAuthenticated, getBookmarkedJobs);
 
 export default router;

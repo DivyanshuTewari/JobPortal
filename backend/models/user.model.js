@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         enum: ['student', 'recruiter'],
         required: true,
     },
+    bookmarks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Job'
+    }],
     profile: {
         bio: {type: String},
         skills: [{type: String}],

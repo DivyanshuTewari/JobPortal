@@ -3,8 +3,9 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
+import { APPLICATION_API_END_POINT, JOB_API_END_POINT, USER_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
+import { setUser } from '@/redux/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
@@ -17,6 +18,29 @@ function JobDescription() {
   const params = useParams();
   const jobId = params.id;
   const dispatch = useDispatch();
+
+  const isBookmarked = user?.bookmarks?.includes(jobId);
+
+  const saveJobHandler = async () => {
+    try {
+      const res = await axios.get(`${USER_API_END_POINT}/bookmark/${jobId}`, {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        let updatedBookmarks;
+        if (isBookmarked) {
+            updatedBookmarks = user.bookmarks.filter(id => id !== jobId);
+        } else {
+            updatedBookmarks = [...(user.bookmarks || []), jobId];
+        }
+        dispatch(setUser({...user, bookmarks: updatedBookmarks}));
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  }
   
   const applyJobHandler = async () => {
     try{
@@ -61,7 +85,9 @@ function JobDescription() {
         </div>
         
         <Button onClick={isApplied ? null : applyJobHandler} disabled={isApplied} className ={`rounded-lg ${isApplied ? 'bg-gray-600' : 'bg-pink-500 hover:bg-pink-600 hover:scale-105 transition-all duration-300'}`}>{isApplied ? 'Already Applied' : 'Apply Now' }</Button>
-           
+        <Button onClick={saveJobHandler} className="rounded-lg ml-4 bg-purple-600 hover:bg-purple-700 hover:scale-105 transition-all duration-300 text-white">
+            {isBookmarked ? 'Unsave' : 'Save'}
+        </Button>
       </div>
       <h1 className = 'border-b-2 border-b-gray-300 font-medium py-4'>Job Description</h1>
       <div className = 'my-4'>

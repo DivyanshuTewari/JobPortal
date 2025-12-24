@@ -50,6 +50,74 @@ export const register = async (req , res) => {
     }
 }
 
+// Bookmark job
+export const toggleBookmark = async (req, res) => {
+    try {
+        const userId = req.id;
+        const jobId = req.params.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            });
+        }
+        
+        if (user.bookmarks.includes(jobId)) {
+            // Remove from bookmarks
+            await user.updateOne({ $pull: { bookmarks: jobId } });
+            return res.status(200).json({
+                message: "Removed from bookmarks",
+                success: true,
+            });
+        } else {
+            // Add to bookmarks
+            await user.updateOne({ $addToSet: { bookmarks: jobId } });
+            return res.status(200).json({
+                message: "Saved to bookmarks",
+                success: true,
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    }
+}
+
+// Get all bookmarked jobs
+export const getBookmarkedJobs = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId).populate({
+            path: 'bookmarks',
+            populate: {
+                path: 'company'
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            });
+        }
+
+        return res.status(200).json({
+            bookmarks: user.bookmarks,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
+    }
+}
+
 
 
 //Login
@@ -96,6 +164,7 @@ export const login = async (req,res) => {
             phoneNumber: user.phoneNumber,
             role: user.role,
             profile: user.profile,
+            bookmarks: user.bookmarks,
         }
         return res.status(200).cookie("token" , token , {maxAge: 1*24*60*60*1000 , httpOnly:true , sameSite: "strict"}).json({
             message: `Welcome back ${user.fullname}`,
@@ -178,6 +247,7 @@ export const updateProfile = async(req,res) => {
             phoneNumber: user.phoneNumber,
             role: user.role,
             profile: user.profile,
+            bookmarks: user.bookmarks,
         }
         return res.status(200).json({
             message: "Profile updated successfully",
