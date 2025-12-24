@@ -1,6 +1,7 @@
 import React, { use, useEffect, useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button';
+import { Bookmark } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { APPLICATION_API_END_POINT, JOB_API_END_POINT, USER_API_END_POINT } from '@/utils/constant';
@@ -8,13 +9,15 @@ import { setSingleJob } from '@/redux/jobSlice';
 import { setUser } from '@/redux/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import { calculateMatchScore } from '@/utils/matchScore';
 
 function JobDescription() {
   const {singleJob} = useSelector(store => store.job);
   const {user} = useSelector(store => store.auth);
   const isInitiallyApplied = singleJob?.applications?.some(application => application.applicant == user?._id) || false; ;
   const [isApplied, setIsApplied] = useState(isInitiallyApplied);
-  
+  const [matchScore, setMatchScore] = useState(0);
+
   const params = useParams();
   const jobId = params.id;
   const dispatch = useDispatch();
@@ -58,6 +61,13 @@ function JobDescription() {
     }
   }
   useEffect(() => {
+    if (singleJob && user) {
+        const score = calculateMatchScore(user, singleJob);
+        setMatchScore(score);
+    }
+  }, [singleJob, user]);
+
+  useEffect(() => {
     const fetchSingleJob = async () => {
       try {
         const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, { withCredentials: true });
@@ -84,12 +94,39 @@ function JobDescription() {
           </div>
         </div>
         
-        <Button onClick={isApplied ? null : applyJobHandler} disabled={isApplied} className ={`rounded-lg ${isApplied ? 'bg-gray-600' : 'bg-pink-500 hover:bg-pink-600 hover:scale-105 transition-all duration-300'}`}>{isApplied ? 'Already Applied' : 'Apply Now' }</Button>
-        <Button onClick={saveJobHandler} className="rounded-lg ml-4 bg-purple-600 hover:bg-purple-700 hover:scale-105 transition-all duration-300 text-white">
-            {isBookmarked ? 'Unsave' : 'Save'}
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={isApplied ? null : applyJobHandler} disabled={isApplied} className ={`rounded-lg ${isApplied ? 'bg-gray-600' : 'bg-pink-500 hover:bg-pink-600 hover:scale-105 transition-all duration-300'}`}>{isApplied ? 'Already Applied' : 'Apply Now' }</Button>
+            <Button onClick={saveJobHandler} variant="outline" size="icon" className="rounded-full hover:scale-105 transition-all duration-300">
+                <Bookmark className={isBookmarked ? "fill-purple-600 text-purple-600" : ""} />
+            </Button>
+        </div>
       </div>
       <h1 className = 'border-b-2 border-b-gray-300 font-medium py-4'>Job Description</h1>
+      
+      {/* Match Score Indicator */}
+      {user && (
+        <div className="my-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h2 className="font-bold text-lg mb-2">Profile Match Score</h2>
+          <div className="flex items-center gap-4">
+            <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+              <div 
+                className={`h-4 rounded-full transition-all duration-1000 ${
+                  matchScore >= 70 ? 'bg-green-500' : 
+                  matchScore >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                }`} 
+                style={{ width: `${matchScore}%` }}
+              ></div>
+            </div>
+            <span className="font-bold text-xl min-w-[3ch]">{matchScore}%</span>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            {matchScore >= 70 ? "Excellent match! Your skills align well with this job." : 
+             matchScore >= 40 ? "Good match. You have some relevant skills." : 
+             "Low match. You might need to upskill for this role."}
+          </p>
+        </div>
+      )}
+
       <div className = 'my-4'>
         <h1 className='font-bold my-1'>Role: <span className = 'pl-4 font-normal text-gray-800'>{singleJob?.title}</span></h1>
         <h1 className='font-bold my-1'>Location: <span className = 'pl-4 font-normal text-gray-800'>{singleJob?.location}</span></h1>
