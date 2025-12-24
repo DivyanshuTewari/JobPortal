@@ -4,6 +4,7 @@ import Footer from './Footer'
 import FilterCard from './FilterCard'
 import Job from './Job'
 import { useSelector } from 'react-redux'
+import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
 
 // Utility function to parse salary range
 const parseSalaryRange = (salaryRange) => {
@@ -40,6 +41,7 @@ const matchesSalaryRange = (jobSalary, salaryRange) => {
 };
 
 function Jobs() {
+  useGetAppliedJobs(); // Fetch applied jobs when component mounts
   const { allJobs, searchedQuery, filters } = useSelector(store => store.job);
   
   // Ensure filters object exists with default values
