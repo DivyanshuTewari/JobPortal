@@ -7,9 +7,8 @@ import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import axios from 'axios'
-import { APPLICATION_API_END_POINT, USER_API_END_POINT } from '@/utils/constant'
+import { APPLICATION_API_END_POINT } from '@/utils/constant'
 import { setAllAppliedJobs } from '@/redux/jobSlice'
-import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
 
 function Job({job}) {
@@ -19,31 +18,6 @@ function Job({job}) {
   const { allAppliedJobs } = useSelector(store => store.job);
   const [isApplied, setIsApplied] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
-
-  const isBookmarked = user?.bookmarks?.includes(job?._id);
-
-  const saveJobHandler = async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await axios.get(`${USER_API_END_POINT}/bookmark/${job?._id}`, {
-        withCredentials: true
-      });
-      if (res.data.success) {
-        toast.success(res.data.message);
-        
-        let updatedBookmarks;
-        if (isBookmarked) {
-            updatedBookmarks = user.bookmarks.filter(id => id !== job._id);
-        } else {
-            updatedBookmarks = [...(user.bookmarks || []), job._id];
-        }
-        dispatch(setUser({...user, bookmarks: updatedBookmarks}));
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Something went wrong");
-    }
-  }
   
   const daysAgoFunction = (mongodbTime) => {
     const createdAt = new Date(mongodbTime);
@@ -159,9 +133,11 @@ function Job({job}) {
           variant="outline" 
           className="rounded-full" 
           size="icon"
-          onClick={saveJobHandler}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card click when clicking bookmark
+          }}
         >
-          <Bookmark className={isBookmarked ? "fill-black" : ""} />
+          <Bookmark />
         </Button>
       </div>
       <div className="flex items-center gap-2 my-2">
