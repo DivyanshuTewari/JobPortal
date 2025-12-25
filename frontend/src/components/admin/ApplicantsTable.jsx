@@ -8,13 +8,14 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { APPLICATION_API_END_POINT } from '@/utils/constant';
 
-const shortlistingStatus = ["Accepted", "Rejected"]; 
+const shortlistingStatus = ["Viewed", "Shortlisted", "Interview", "Offer", "Rejected"]; 
 
 const ApplicantsTable = () => {
     const statusHandler = async (status, id) => {
         try {
             axios.defaults.withCredentials = true;
-            const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, {status}, {withCredentials:true});
+            const payloadStatus = status === "Offer" ? "Accepted" : status;
+            const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, {status: payloadStatus}, {withCredentials:true});
             if(res.data.success){
                 toast.success(res.data.message);
             }            

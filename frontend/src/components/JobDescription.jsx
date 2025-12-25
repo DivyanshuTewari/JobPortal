@@ -1,7 +1,7 @@
 import React, { use, useEffect, useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Eye, CheckCircle2, CalendarDays, BadgeCheck, XCircle, Send } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { APPLICATION_API_END_POINT, JOB_API_END_POINT, USER_API_END_POINT } from '@/utils/constant';
@@ -17,6 +17,16 @@ function JobDescription() {
   const isInitiallyApplied = singleJob?.applications?.some(application => application.applicant == user?._id) || false; ;
   const [isApplied, setIsApplied] = useState(isInitiallyApplied);
   const [matchScore, setMatchScore] = useState(0);
+  const [applicationStatus, setApplicationStatus] = useState(isInitiallyApplied ? "pending" : "");
+  const steps = [
+    { key: "pending", label: "Applied", Icon: Send },
+    { key: "viewed", label: "Viewed", Icon: Eye },
+    { key: "shortlisted", label: "Shortlisted", Icon: CheckCircle2 },
+    { key: "interview", label: "Interview", Icon: CalendarDays },
+    { key: "accepted", label: "Offer", Icon: BadgeCheck },
+    { key: "rejected", label: "Rejected", Icon: XCircle },
+  ];
+  const order = steps.map(s => s.key);
 
   const params = useParams();
   const jobId = params.id;
@@ -51,6 +61,7 @@ function JobDescription() {
       console.log(res.data);
       if(res.data.success){
         setIsApplied(true); //update the local state
+        setApplicationStatus("pending");
         const updatedSingleJob = {...singleJob, applications:[...singleJob.applications, {applicant: user?._id}]};
         dispatch(setSingleJob(updatedSingleJob)); //update the real time UI
         toast.success(res.data.message);
@@ -82,6 +93,27 @@ function JobDescription() {
     }
     fetchSingleJob();
   }, [jobId, dispatch, user?._id]);
+  useEffect(() => {
+    const fetchApplicationStatus = async () => {
+      try {
+        const res = await axios.get(`${APPLICATION_API_END_POINT}/get`, { withCredentials: true });
+        if (res.data.success && Array.isArray(res.data.application)) {
+          const app = res.data.application.find(a => {
+            const aj = a?.job?._id || a?.job;
+            return aj === jobId || aj?.toString() === jobId?.toString();
+          });
+          if (app?.status) {
+            setApplicationStatus(app.status);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (user?._id) {
+      fetchApplicationStatus();
+    }
+  }, [user?._id, jobId]);
   return (
     <div className='max-w-7xl mx-auto my-10'>
       <div className = 'flex items-center justify-between' >
@@ -93,7 +125,6 @@ function JobDescription() {
             <Badge className="text-purple-700" variant="ghost">{singleJob?.salary} LPA</Badge>
           </div>
         </div>
-        
         <div className="flex items-center gap-2">
             <Button onClick={isApplied ? null : applyJobHandler} disabled={isApplied} className ={`rounded-lg ${isApplied ? 'bg-gray-600' : 'bg-pink-500 hover:bg-pink-600 hover:scale-105 transition-all duration-300'}`}>{isApplied ? 'Already Applied' : 'Apply Now' }</Button>
             <Button onClick={saveJobHandler} variant="outline" size="icon" className="rounded-full hover:scale-105 transition-all duration-300">
@@ -124,6 +155,37 @@ function JobDescription() {
              matchScore >= 40 ? "Good match. You have some relevant skills." : 
              "Low match. You might need to upskill for this role."}
           </p>
+        </div>
+      )}
+
+      {isApplied && (
+        <div className="my-4 p-4 border border-gray-200 rounded-lg">
+          <div className="font-bold text-lg mb-3">Application Timeline</div>
+          <div className="relative px-2">
+            <div className="absolute left-2 right-2 top-6 h-1 bg-gray-200 rounded-full" />
+            <div className="flex items-center justify-between relative">
+              {steps.map((step, idx) => {
+                const currentIndex = order.indexOf(applicationStatus);
+                const reached = currentIndex >= 0 && currentIndex >= idx;
+                const isRejected = applicationStatus === "rejected";
+                const active = (reached && !isRejected) || (isRejected && step.key === "rejected");
+                const IconComp = step.Icon;
+                return (
+                  <div key={step.key} className="flex flex-col items-center w-full">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${active ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white ring-2 ring-purple-300 shadow-md' : 'bg-gray-200 text-gray-600'}`}>
+                      <IconComp className="w-6 h-6" />
+                    </div>
+                    <div className={`mt-2 text-xs ${active ? 'font-semibold text-gray-800' : 'text-gray-500'}`}>
+                      {step.label}
+                    </div>
+                    {idx < steps.length - 1 && (
+                      <div className={`hidden sm:block h-1 w-full ${active ? 'bg-gradient-to-r from-purple-600 to-pink-500' : 'bg-gray-300'} rounded-full mt-[-24px]`} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
 
